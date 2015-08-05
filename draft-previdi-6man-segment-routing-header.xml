@@ -1,0 +1,1553 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-previdi-6man-segment-routing-header-08"
+     ipr="trust200902">
+  <front>
+    <title abbrev="IPv6 Segment Routing Header (SRH)">IPv6 Segment Routing
+    Header (SRH)</title>
+
+    <author fullname="Stefano Previdi" initials="S." role="editor"
+            surname="Previdi">
+      <organization>Cisco Systems, Inc.</organization>
+
+      <address>
+        <postal>
+          <street>Via Del Serafico, 200</street>
+
+          <city>Rome</city>
+
+          <code>00142</code>
+
+          <country>Italy</country>
+        </postal>
+
+        <email>sprevidi@cisco.com</email>
+      </address>
+    </author>
+
+    <author fullname="Clarence Filsfils" initials="C." surname="Filsfils">
+      <organization>Cisco Systems, Inc.</organization>
+
+      <address>
+        <postal>
+          <street/>
+
+          <city>Brussels</city>
+
+          <region/>
+
+          <code/>
+
+          <country>BE</country>
+        </postal>
+
+        <email>cfilsfil@cisco.com</email>
+      </address>
+    </author>
+
+    <author fullname="Eric Vyncke" initials="E." surname="Vyncke">
+      <organization>Cisco Systems, Inc.</organization>
+
+      <address>
+        <postal>
+          <street>De Kleetlaann 6A</street>
+
+          <city>Diegem</city>
+
+          <region/>
+
+          <code>1831</code>
+
+          <country>Belgium</country>
+        </postal>
+
+        <email>evyncke@cisco.com</email>
+      </address>
+    </author>
+
+    <author fullname="Brian Field" initials="B." surname="Field">
+      <organization>Comcast</organization>
+
+      <address>
+        <postal>
+          <street>4100 East Dry Creek Road</street>
+
+          <city>Centennial</city>
+
+          <region>CO</region>
+
+          <code>80122</code>
+
+          <country>US</country>
+        </postal>
+
+        <email>Brian_Field@cable.comcast.com</email>
+      </address>
+    </author>
+
+    <author fullname="Ida Leung" initials="I." surname="Leung">
+      <organization>Rogers Communications</organization>
+
+      <address>
+        <postal>
+          <street>8200 Dixie Road</street>
+
+          <city>Brampton</city>
+
+          <region>ON</region>
+
+          <code>L6T 0C1</code>
+
+          <country>CA</country>
+        </postal>
+
+        <email>Ida.Leung@rci.rogers.com</email>
+      </address>
+    </author>
+
+    <author fullname="Jen Linkova" initials="J." surname="Linkova">
+      <organization abbrev="Google">Google</organization>
+
+      <address>
+        <postal>
+          <street>1600 Amphitheatre Parkway</street>
+
+          <city>Mountain View</city>
+
+          <region>CA 94043</region>
+
+          <country>USA</country>
+        </postal>
+
+        <email>furry@google.com</email>
+      </address>
+    </author>
+
+    <author fullname="Ebben Aries" initials="E." surname="Aries">
+      <organization>Facebook</organization>
+
+      <address>
+        <postal>
+          <street/>
+
+          <city/>
+
+          <code/>
+
+          <country>US</country>
+        </postal>
+
+        <email>exa@fb.com</email>
+      </address>
+    </author>
+
+    <author fullname="David Lebrun" initials="D." surname="Lebrun">
+      <organization>Universite Catholique de Louvain</organization>
+
+      <address>
+        <postal>
+          <street>Place Ste Barbe, 2</street>
+
+          <city>Louvain-la-Neuve, 1348</city>
+
+          <country>Belgium</country>
+        </postal>
+
+        <email>david.lebrun@uclouvain.be</email>
+      </address>
+    </author>
+
+    <date day="4" month="August" year="2015"/>
+
+    <workgroup>Network Working Group</workgroup>
+
+    <abstract>
+      <t>Segment Routing (SR) allows a node to steer a packet through a
+      controlled set of instructions, called segments, by inserting a SR
+      header (SRH) in the packet. A segment can represent any instruction,
+      topological or service-based. SR allows to enforce a flow through any
+      path (topological, or application/service based) while maintaining
+      per-flow state only at the ingress node to the SR domain.</t>
+
+      <t>Segment Routing can be applied to the IPv6 data plane with the
+      addition of a new type of Routing Extension Header. This draft describes
+      the Segment Routing Extension Header and how it is used by SR capable
+      nodes.</t>
+    </abstract>
+
+    <note title="Requirements Language">
+      <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+      "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+      document are to be interpreted as described in <xref
+      target="RFC2119">RFC 2119</xref>.</t>
+    </note>
+  </front>
+
+  <middle>
+    <section title="Structure of this document">
+      <t><xref target="INTRO"/> gives an introduction on SR for IPv6
+      networks.</t>
+
+      <t><xref target="ABSTRACTMODEL"/> describes the Segment Routing abstract
+      model.</t>
+
+      <t><xref target="SRIPV6"/> defines the Segment Routing Header (SRH)
+      allowing instantiation of SR over IPv6 dataplane.</t>
+
+      <t><xref target="SRHPROC"/> details the procedures of the Segment
+      Routing Header.</t>
+    </section>
+
+    <section anchor="SRDOCS" title="Segment Routing Documents">
+      <t>Segment Routing terminology is defined in <xref
+      target="I-D.ietf-spring-segment-routing"/>.</t>
+
+      <t>Segment Routing IPv6 use cases are described in <xref
+      target="I-D.ietf-spring-ipv6-use-cases"/>.</t>
+
+      <t>Segment Routing protocol extensions are defined in <xref
+      target="I-D.ietf-isis-segment-routing-extensions"/>, and <xref
+      target="I-D.ietf-ospf-ospfv3-segment-routing-extensions"/>.</t>
+    </section>
+
+    <section anchor="INTRO" title="Introduction">
+      <t>Segment Routing (SR), defined in <xref
+      target="I-D.ietf-spring-segment-routing"/>, allows a node to steer a
+      packet through a controlled set of instructions, called segments, by
+      inserting a SR header in the packet. A segment can represent any
+      instruction, topological or service-based. SR allows to enforce a flow
+      through any path (topological or service/application based) while
+      maintaining per-flow state only at the ingress node to the SR domain.
+      Segments can be derived from different components: IGP, BGP, Services,
+      Contexts, Locators, etc. The list of segment forming the path is called
+      the Segment List and is encoded in the packet header.</t>
+
+      <t>SR allows the use of strict and loose source based routing paradigms
+      without requiring any additional signaling protocols in the
+      infrastructure hence delivering an excellent scalability property.</t>
+
+      <t>The source based routing model described in <xref
+      target="I-D.ietf-spring-segment-routing"/> is inherited from the ones
+      proposed by <xref target="RFC1940"/> and <xref target="RFC2460"/>. The
+      source based routing model offers the support for explicit routing
+      capability.</t>
+
+      <section anchor="DATAPLANES"
+               title="Data Planes supporting Segment Routing">
+        <t>Segment Routing (SR), can be instantiated over MPLS (<xref
+        target="I-D.ietf-spring-segment-routing-mpls"/>) and IPv6. This
+        document defines its instantiation over the IPv6 data-plane based on
+        the use-cases defined in <xref
+        target="I-D.ietf-spring-ipv6-use-cases"/>.</t>
+
+        <t>Segment Routing for IPv6 (SR-IPv6) is required in networks where
+        MPLS data-plane is not used or, when combined with SR-MPLS, in
+        networks where MPLS is used in the core and IPv6 is used at the edge
+        (home networks, datacenters).</t>
+
+        <t>This document defines a new type of Routing Header (originally
+        defined in <xref target="RFC2460"/>) called the Segment Routing Header
+        (SRH ) in order to convey the Segment List in the packet header as
+        defined in <xref target="I-D.ietf-spring-segment-routing"/>.
+        Mechanisms through which segment are known and advertised are outside
+        the scope of this document. In this document, the abbreviation SRH
+        will be used as a short-hand for Segment Routing Header, therefore SRH
+        does not mean Source Routing Header as in <xref
+        target="RFC6554"/>.</t>
+      </section>
+
+      <section anchor="ILLUSTRATION" title="Illustration">
+        <t>In the context of <xref target="SRPROPS"/> where all the links have
+        the same IGP cost, let us assume that a packet P enters the SR domain
+        at an ingress edge router I and that the operator requests the
+        following requirements for packet P:<list style="hanging">
+            <t>The local service S offered by node B must be applied to packet
+            P.</t>
+
+            <t>The links AB and CE cannot be used to transport the packet
+            P.</t>
+
+            <t>Any node N along the journey of the packet should be able to
+            determine where the packet P entered the SR domain and where it
+            will exit. The intermediate node should be able to determine the
+            paths from the ingress edge router to itself, and from itself to
+            the egress edge router.</t>
+
+            <t>Per-flow State for packet P should only be created at the
+            ingress edge router.</t>
+
+            <t>The operator can forbid, for security reasons, anyone outside
+            the operator domain to exploit its intra-domain SR
+            capabilities.</t>
+          </list></t>
+
+        <figure align="center" anchor="SRPROPS"
+                title="An illustration of SR properties">
+          <artwork><![CDATA[I---A---B---C---E
+     \  |  / \ /
+      \ | /   F
+       \|/
+        D]]></artwork>
+        </figure>
+
+        <t>All these properties may be realized by instructing the ingress SR
+        edge router I to push the following abstract SR header (SRH) on the
+        packet P.</t>
+
+        <figure anchor="SRHEADER" title="Packet P at node I">
+          <artwork><![CDATA[
++---------------------------------------------------------------+
+|                                   |                           |
+|      Abstract SRH                 |                           |
+|                                   |                           |
+| {SD, SB, SS, SF, SE}, Ptr, SI, SE |        Transported        |
+|  ^                     |          |           Packet          |
+|  |                     |          |             P             |
+|  +---------------------+          |                           |
+|                                   |                           |
++---------------------------------------------------------------+]]></artwork>
+        </figure>
+
+        <t>The abstract SRH contains a source route encoded as a list of
+        segments {SD, SB, SS, SF, SE}, a pointer (Ptr) and the identification
+        of the ingress and egress SR edge routers (segments SI and SE).</t>
+
+        <t>A segment identifies a topological instruction or a service
+        instruction. A segment can either be global or local. The instruction
+        associated with a global segment is recognized and executed by any
+        SR-capable node in the domain. The instruction associated with a local
+        segment is only supported by the specific node that originates it.</t>
+
+        <t>Let us assume some IGP (i.e.: ISIS and OSPF) extensions to define a
+        &ldquo;Node Segment&rdquo; as a global instruction within the IGP
+        domain to forward a packet along the shortest path to the specified
+        node. Let us further assume that within the SR domain illustrated in
+        Figure 1, segments SI, SD, SB, SE and SF respectively identify IGP
+        node segments to I, D, B, E and F.</t>
+
+        <t>Let us assume that node B identifies its local service S with local
+        segment SS.</t>
+
+        <t>With all of this in mind, let us describe the journey of the packet
+        P.</t>
+
+        <t>The packet P reaches the ingress SR edge router I, which inserts
+        the SRH illustrated in Figure 2 and sets the pointer to the first
+        segment of the list (SD).</t>
+
+        <t>SD is an instruction recognized by all the nodes in the SR domain
+        which causes the packet to be forwarded along the shortest path to
+        D.</t>
+
+        <t>Once at D, the pointer is incremented and the next segment is
+        executed (SB).</t>
+
+        <t>SB is an instruction recognized by all the nodes in the SR domain
+        which causes the packet to be forwarded along the shortest path to
+        B.</t>
+
+        <t>Once at B, the pointer is incremented and the next segment is
+        executed (SS).</t>
+
+        <t>SS is an instruction only recognized by node B which causes the
+        packet to receive service S.</t>
+
+        <t>Once the service applied, the next segment is executed (SF) which
+        causes the packet to be forwarded along the shortest path to F.</t>
+
+        <t>Once at F, the pointer is incremented and the next segment is
+        executed (SE).</t>
+
+        <t>SE is an instruction recognized by all the nodes in the SR domain
+        which causes the packet to be forwarded along the shortest path to
+        E.</t>
+
+        <t>E then removes the SRH and the packet continues its journey outside
+        the SR domain.</t>
+
+        <t>All of the requirements are met.</t>
+
+        <t>First, the packet P has not used links AB and CE: the shortest-path
+        from I to D is I-A-D, the shortest-path from D to B is D-B, the
+        shortest-path from B to F is B-C-F and the shortest-path from F to E
+        is F-E, hence the packet path through the SR domain is I-A-D-B-C-F-E
+        and the links AB and CE have been avoided.</t>
+
+        <t>Second, the service S supported by B has been applied on packet
+        P.</t>
+
+        <t>Third, any node along the packet path is able to identify the
+        service and topological journey of the packet within the SR domain.
+        For example, node C receives the packet illustrated in <xref
+        target="SRHEADER2"/> and hence is able to infer where the packet
+        entered the SR domain (SI), how it got up to itself {SD, SB, SS, SE},
+        where it will exit the SR domain (SE) and how it will do so {SF,
+        SE}.</t>
+
+        <figure anchor="SRHEADER2" title="Packet P at node C">
+          <artwork><![CDATA[+---------------------------------------------------------------+
+|                                   |                           |
+|           SRH                     |                           |
+|                                   |                           |
+| {SD, SB, SS, SF, SE}, Ptr, SI, SE |        Transported        |
+|               ^        |          |           Packet          |
+|               |        |          |             P             |
+|               +--------+          |                           |
+|                                   |                           |
++---------------------------------------------------------------+]]></artwork>
+        </figure>
+
+        <t>Fourth, only node I maintains per-flow state for packet P. The
+        entire program of topological and service instructions to be executed
+        by the SR domain on packet P is encoded by the ingress edge router I
+        in the SRH in the form of a list of segments where each segment
+        identifies a specific instruction. No further per-flow state is
+        required along the packet path. The per-flow state is in the SRH and
+        travels with the packet. Intermediate nodes only hold states related
+        to the IGP global node segments and the local IGP adjacency segments.
+        These segments are not per-flow specific and hence scale very well.
+        Typically, an intermediate node would maintain in the order of
+        100&rsquo;s to 1000&rsquo;s global node segments and in the order of
+        10&rsquo;s to 100 of local adjacency segments. Typically the SR IGP
+        forwarding table is expected to be much less than 10000 entries.</t>
+
+        <t>Fifth, the SRH is inserted at the entrance to the domain and
+        removed at the exit of the operator domain. For security reasons, the
+        operator can forbid anyone outside its domain to use its intra-domain
+        SR capability.</t>
+      </section>
+    </section>
+
+    <section anchor="ABSTRACTMODEL" title="Abstract Routing Model">
+      <t>At the entrance of the SR domain, the ingress SR edge router pushes
+      the SRH on top of the packet. At the exit of the SR domain, the egress
+      SR edge router removes the SRH.</t>
+
+      <t>The abstract SRH contains an ordered list of segments, a pointer
+      identifying the next segment to process and the identifications of the
+      ingress and egress SR edge routers on the path of this packet. The
+      pointer identifies the segment that MUST be used by the receiving router
+      to process the packet. This segment is called the active segment.</t>
+
+      <t>A property of SR is that the entire source route of the packet,
+      including the identity of the ingress and egress edge routers is always
+      available with the packet. This allows for interesting accounting and
+      service applications.</t>
+
+      <t>We define three SR-header operations: <list style="hanging">
+          <t>&ldquo;PUSH&rdquo;: an SRH is pushed on an IP packet, or
+          additional segments are added at the head of the segment list. The
+          pointer is moved to the first entry of the added segments.</t>
+
+          <t>&ldquo;NEXT&rdquo;: the active segment is completed, the pointer
+          is moved to the next segment in the list.</t>
+
+          <t>&ldquo;CONTINUE&rdquo;: the active segment is not completed, the
+          pointer is left unchanged.</t>
+        </list></t>
+
+      <t>In the future, other SR-header management operations may be
+      defined.</t>
+
+      <t>As the packet travels through the SR domain, the pointer is
+      incremented through the ordered list of segments and the source route
+      encoded by the SR ingress edge node is executed.</t>
+
+      <t>A node processes an incoming packet according to the instruction
+      associated with the active segment.</t>
+
+      <t>Any instruction might be associated with a segment: for example, an
+      intra-domain topological strict or loose forwarding instruction, a
+      service instruction, etc.</t>
+
+      <t>At minimum, a segment instruction must define two elements: the
+      identity of the next-hop to forward the packet to (this could be the
+      same node or a context within the node) and which SR-header management
+      operation to execute.</t>
+
+      <t>Each segment is known in the network through a Segment Identifier
+      (SID). The terms &ldquo;segment&rdquo; and &ldquo;SID&rdquo; are
+      interchangeable.</t>
+
+      <section anchor="SRGBSEC" title="Segment Routing Global Block (SRGB)">
+        <t>In the SR abstract model, a segment is identified by a Segment
+        Routing Identifier (SID). The SR abstract model doesn't mandate a
+        specific format for the SID (IPv6 address or other formats).</t>
+
+        <t>In Segment Routing IPv6 the SID is an IPv6 address. Therefore, the
+        SRGB is materialized by the global IPv6 address space which represents
+        the set of IPv6 routable addresses in the SR domain. The following
+        rules apply: <list style="symbols">
+            <t>Each node of the SR domain MUST be configured with the Segment
+            Routing Global Block (SRGB).</t>
+
+            <t>All global segments must be allocated from the SRGB. Any SR
+            capable node MUST be able to process any global segment advertised
+            by any other node within the SR domain.</t>
+
+            <t>Any segment outside the SRGB has a local significance and is
+            called a &ldquo;local segment&rdquo;. An SR-capable node MUST be
+            able to process the local segments it originates. An SR-capable
+            node MUST NOT support the instruction associated with a local
+            segment originated by a remote node.</t>
+          </list></t>
+      </section>
+
+      <section anchor="SRTE" title="Traffic Engineering with SR">
+        <t>An SR Traffic Engineering policy is composed of two elements: a
+        flow classification and a segment-list to prepend on the packets of
+        the flow.</t>
+
+        <t>In SR, this per-flow state only exists at the ingress edge node
+        where the policy is defined and the SRH is pushed.</t>
+
+        <t>It is outside the scope of the document to define the process that
+        leads to the instantiation at a node N of an SR Traffic Engineering
+        policy.</t>
+
+        <t><xref target="I-D.ietf-spring-resiliency-use-cases"/> illustrates
+        various alternatives:<list style="hanging">
+            <t>N is deriving this policy automatically (e.g. FRR).</t>
+
+            <t>N is provisioned explicitly by the operator.</t>
+
+            <t>N is provisioned by a controller or server (e.g.: SDN
+            Controller).</t>
+
+            <t>N is provisioned by the operator with a high-level policy which
+            is mapped into a path thanks to a local CSPF-based computation
+            (e.g. affinity/SRLG exclusion).</t>
+
+            <t>N could also be provisioned by other means.</t>
+          </list></t>
+
+        <t><xref target="I-D.ietf-spring-segment-routing"/> explains why the
+        majority of use-cases require very short segment-lists, hence
+        minimizing the performance impact, if any, of inserting and
+        transporting the segment list.</t>
+
+        <t>A SDN controller, which desires to instantiate at node N an SR
+        Traffic Engineering policy, collects the SR capability of node N such
+        as to ensure that the policy meets its capability.</t>
+      </section>
+
+      <section anchor="SRDB" title="Segment Routing Database">
+        <t>The Segment routing Database (SRDB) is a set of entries where each
+        entry is identified by a SID. The instruction associated with each
+        entry at least defines the identity of the next-hop to which the
+        packet should be forwarded and what operation should be performed on
+        the SRH (PUSH, CONTINUE, NEXT).</t>
+
+        <figure anchor="SRDATABASE" title="SR Database">
+          <artwork><![CDATA[+---------+-----------+---------------------------------+
+| Segment |  Next-Hop |  SRH operation                  |
++---------+-----------+---------------------------------+
+|   Sk    |     M     | CONTINUE                        |
+|   Sj    |     N     | NEXT                            |
+|   Sl    | DPI Srvc  | NEXT                            |
+|   Sm    |  FW srvc  | NEXT                            |
+|   Sn    |     Q     | NEXT                            |
+|  etc.   |   etc.    | etc.                            |
++---------+-----------+---------------------------------+]]></artwork>
+        </figure>
+
+        <t>Each SR-capable node maintains its local SRDB. SRDB entries can
+        either derive from local policy or from protocol segment
+        advertisement.</t>
+      </section>
+    </section>
+
+    <section anchor="SRIPV6" title="IPv6 Instantiation of Segment Routing ">
+      <section anchor="SID" title="Segment Identifiers (SIDs) and SRGB">
+        <t>Segment Routing, as described in <xref
+        target="I-D.ietf-spring-segment-routing"/>, defines Node-SID and
+        Adjacency-SID. When SR is used over IPv6 data-plane the following
+        applies.</t>
+
+        <t>The SRGB is the global unicast IPv6 address space which represents
+        the set of IPv6 routable addresses in the SR domain.</t>
+
+        <section anchor="NODESID" title="Node-SID">
+          <t>The Node-SID identifies a node. With SR-IPv6 the Node-SID is an
+          IPv6 prefix that the operator configured on the node and that is
+          used as the node identifier. Typically, in case of a router, this is
+          the IPv6 address of the node loopback interface. Therefore, SR-IPv6
+          does not require any additional SID advertisement for the Node
+          Segment. The Node-SID is in fact the IPv6 address of the node.</t>
+
+          <t>Node SIDs are IPv6 addresses part of the SRGB (i.e.: addresses of
+          global scope).</t>
+        </section>
+
+        <section anchor="ADJSID" title="Adjacency-SID">
+          <t>Adjacency-SIDs can be either globally scoped IPv6 addresses or
+          any 128-bit identifier representing the adjacency. Obviously, in the
+          latter case, the scope of the Adjacency-SID is local to the router
+          and any packet with the a such Adjacency-SID would need first to
+          reach the node through the node's Node-SID prior for the node to
+          process the Adjacency-SID. In other wrods, two segments (SIDs) would
+          then be required: the first is the node's Node-SID that brings the
+          packet to the node and the second is the Adjacency-SID that will
+          make the node to forward the packet through the interface the
+          Adjacency-SID is allocated to.</t>
+
+          <t>In the SR architecture defined in <xref
+          target="I-D.ietf-spring-segment-routing"/> a node may advertise one
+          (or more) Adj-SIDs allocated to the same interface as well as a node
+          can advertise the same Adj-SID for multiple interfaces. Use cases of
+          Adj-SID advertisements are described in <xref
+          target="I-D.ietf-spring-segment-routing"/>The semantic of the
+          Adj-SID is: <list>
+              <t>Send out the packet to the interface this Adj-SID is
+              allocated to.</t>
+            </list></t>
+
+          <t>Advertisement of Adj-SID may be done using multiple mechanisms
+          among which the ones described in ISIS and OSPF protocol extensions:
+          <xref target="I-D.ietf-isis-segment-routing-extensions"/> and <xref
+          target="I-D.ietf-ospf-ospfv3-segment-routing-extensions"/>. The
+          distinction between local and global significance of the Adj-SID is
+          given in the encoding of the Adj-SID advertisement.</t>
+        </section>
+      </section>
+
+      <section anchor="SRH" title="Segment Routing Extension Header (SRH)">
+        <t>A new type of the Routing Header (originally defined in <xref
+        target="RFC2460"/>) is defined: the Segment Routing Header (SRH) which
+        has a new Routing Type, (suggested value 4) to be assigned by
+        IANA.</t>
+
+        <t>As an example, if an explicit path is to be constructed across a
+        core network running ISIS or OSPF, the segment list will contain SIDs
+        representing the nodes across the path (loose or strict) which,
+        usually, are the IPv6 loopback interface address of each node. If the
+        path is across service or application entities, the segment list
+        contains the IPv6 addresses of these services or application
+        instances.</t>
+
+        <t>The Segment Routing Header (SRH) is defined as follows:<figure
+            align="left" anchor="SRHFIG" suppress-title="true">
+            <artwork><![CDATA[
+
+  0                   1                   2                   3 
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1    
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ | Next Header   |  Hdr Ext Len  | Routing Type  | Segments Left |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ | First Segment |             Flags             |  HMAC Key ID  |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ |            Segment List[0] (128 bits ipv6 address)            |
+ |                                                               |
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ |                                                               |
+                               ...
+ |                                                               |
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ |            Segment List[n] (128 bits ipv6 address)            |
+ |                                                               |
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ |            Policy List[0] (optional)                          |
+ |                                                               |
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ |            Policy List[1] (optional)                          |
+ |                                                               |
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ |            Policy List[2] (optional)                          |
+ |                                                               |
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ |            Policy List[3] (optional)                          |
+ |                                                               |
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ |                                                               |
+ |                                                               |
+ |                       HMAC (256 bits)                         |
+ |                        (optional)                             |
+ |                                                               |
+ |                                                               |
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+where:]]></artwork>
+          </figure><list style="symbols">
+            <t>Next Header: 8-bit selector. Identifies the type of header
+            immediately following the SRH.</t>
+
+            <t>Hdr Ext Len: 8-bit unsigned integer, is the length of the SRH
+            header in 8-octet units, not including the first 8 octets.</t>
+
+            <t>Routing Type: TBD, to be assigned by IANA (suggested value:
+            4).</t>
+
+            <t>Segments Left. Defined in <xref target="RFC2460"/>, it contains
+            the index, in the Segment List, of the next segment to inspect.
+            Segments Left is decremented at each segment and it is used as an
+            index in the segment list.</t>
+
+            <t>First Segment: offset in the SRH, not including the first 8
+            octets and expressed in 16-octet units, pointing to the last
+            element of the segment list, which is in fact the first segment of
+            the segment routing path.</t>
+
+            <t>Flags: 16 bits of flags. Following flags are defined:<figure
+                align="left" suppress-title="true">
+                <artwork align="left"><![CDATA[
+                           1
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |C|P|R|R|    Policy Flags       |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ ]]></artwork>
+              </figure><list style="hanging">
+                <t>C-flag: Clean-up flag. Set when the SRH has to be removed
+                from the packet when packet reaches the last segment.</t>
+
+                <t>P-flag: Protected flag. Set when the packet has been
+                rerouted through FRR mechanism by a SR endpoint node. See
+                <xref target="FRR"/> for more details.</t>
+
+                <t>R-flags. Reserved and for future use.</t>
+
+                <t>Policy Flags. Define the type of the IPv6 addresses encoded
+                into the Policy List (see below). The following have been
+                defined:<list style="hanging">
+                    <t>Bits 4-6: determine the type of the first element after
+                    the segment list.</t>
+
+                    <t>Bits 7-9: determine the type of the second element.</t>
+
+                    <t>Bits 10-12: determine the type of the third
+                    element.</t>
+
+                    <t>Bits 13-15: determine the type of the fourth
+                    element.</t>
+                  </list>The following values are used for the type:<list
+                    style="hanging">
+                    <t>0x0: Not present. If value is set to 0x0, it means the
+                    element represented by these bits is not present.</t>
+
+                    <t>0x1: SR Ingress.</t>
+
+                    <t>0x2: SR Egress.</t>
+
+                    <t>0x3: Original Source Address.</t>
+                  </list></t>
+              </list></t>
+
+            <t>HMAC Key ID and HMAC field, and their use are defined in <xref
+            target="Security"/>.</t>
+
+            <t>Segment List[n]: 128 bit IPv6 addresses representing the nth
+            segment in the Segment List. The Segment List is encoded starting
+            from the last segment of the path. I.e., the first element of the
+            segment list (Segment List [0]) contains the last segment of the
+            path while the last segment of the Segment List (Segment List[n])
+            contains the first segment of the path. The index contained in
+            "Segments Left" identifies the current active segment.</t>
+
+            <t>Policy List. Optional addresses representing specific nodes in
+            the SR path such as: <list style="hanging">
+                <t>SR Ingress: a 128 bit generic identifier representing the
+                ingress in the SR domain (i.e.: it needs not to be a valid
+                IPv6 address).</t>
+
+                <t>SR Egress: a 128 bit generic identifier representing the
+                egress in the SR domain (i.e.: it needs not to be a valid IPv6
+                address).</t>
+
+                <t>Original Source Address: IPv6 address originally present in
+                the SA field of the packet.</t>
+              </list>The segments in the Policy List are encoded after the
+            segment list and they are optional. If none are in the SRH, all
+            bits of the Policy List Flags MUST be set to 0x0.</t>
+          </list></t>
+
+        <section title="SRH and RFC2460 behavior">
+          <t>The SRH being a new type of the Routing Header, it also has the
+          same properties:<list style="hanging">
+              <t>SHOULD only appear once in the packet;</t>
+
+              <t>MUST be part of the fragmentable part of the packet;</t>
+
+              <t>Only the router whose address is in the DA field of the
+              packet header MUST inspect the SRH.</t>
+            </list></t>
+
+          <t>Therefore, Segment Routing in IPv6 networks implies that the
+          segment identifier (i.e.: the IPv6 address of the segment) is moved
+          into the DA of the packet by SR-enabled routers upon receiving a
+          packet with SRH destined to an address of theirs.</t>
+
+          <t>The DA of the packet changes at each segment
+          termination/completion and therefore the original DA of the packet
+          MUST be encoded as the last segment of the path.</t>
+
+          <t>As illustrated in <xref target="ILLUSTRATION"/>, nodes that are
+          within the path of a segment will forward packets based on the DA of
+          the packet without inspecting the SRH. This ensures full
+          interoperability between SR-capable and non-SR-capable nodes.</t>
+        </section>
+      </section>
+    </section>
+
+    <section anchor="SRHPROC" title="SRH Procedures">
+      <t>In this section we describe the different procedures on the SRH.</t>
+
+      <section anchor="SROPERATIONS" title="Segment Routing Operations">
+        <t>When Segment Routing is instantiated over the IPv6 data plane the
+        following applies:<list style="symbols">
+            <t>The segment list is encoded in the SRH.</t>
+
+            <t>The active segment is in the destination address of the
+            packet.</t>
+
+            <t>The Segment Routing CONTINUE operation (as described in <xref
+            target="I-D.ietf-spring-segment-routing"/>) is implemented as a
+            regular/plain IPv6 operation consisting of DA based
+            forwarding.</t>
+
+            <t>The NEXT operation is implemented through the update of the DA
+            with the value represented by the Next Segment field in the
+            SRH.</t>
+
+            <t>The PUSH operation is implemented through the insertion of the
+            SRH or the insertion of additional segments in the SRH segment
+            list.</t>
+          </list></t>
+      </section>
+
+      <section anchor="SRNODES" title="Segment Routing Node Functions">
+        <t>SR packets are forwarded to segments endpoints (i.e.: the segment
+        endpoint is the node representing the segment and whose address is in
+        the segment list and in the DA of the packet when traveling in the
+        segment). The segment endpoint, when receiving a SR packet destined to
+        itself, does:<list style="symbols">
+            <t>Inspect the SRH and check its SR forwarding policy.</t>
+
+            <t>Determine the next active segment.</t>
+
+            <t>Update the Segments Left field (or, if requested, remove the
+            SRH from the packet).</t>
+
+            <t>Update the DA.</t>
+
+            <t>Send the packet to the next segment.</t>
+          </list></t>
+
+        <t>The procedures applied to the SRH are related to the node function.
+        Following nodes functions are defined:<list style="hanging">
+            <t>Ingress SR Node.</t>
+
+            <t>Transit Non-SR Node.</t>
+
+            <t>Transit SR Intra Segment Node.</t>
+
+            <t>SR Endpoint Node.</t>
+          </list></t>
+
+        <section anchor="INGRESS" title="Ingress SR Node">
+          <t>Ingress Node can be a router at the edge of the SR domain or a
+          SR-capable host. The ingress SR node may obtain the segment list by
+          either: <list style="hanging">
+              <t>Local path computation.</t>
+
+              <t>Local configuration.</t>
+
+              <t>Interaction with an SDN controller delivering the path as a
+              complete SRH.</t>
+
+              <t>Any other mechanism (mechanisms through which the path is
+              acquired are outside the scope of this document).</t>
+            </list></t>
+
+          <t>The following are the steps of the creation of the SRH: <list
+              style="hanging">
+              <t>Next Header and Hdr Ext Len fields are set according to <xref
+              target="RFC2460"/>.</t>
+
+              <t>Routing Type field is set as TBD (SRH).</t>
+
+              <t>The Segment List is built with the FIRST segment of the path
+              encoded in the LAST element of the Segment List. Subsequent
+              segments are encoded on top of the first segment. Finally, the
+              LAST segment of the path is encoded in the FIRST element of the
+              Segment List. In other words, the Segment List is encoded in the
+              reverse order of the path.</t>
+
+              <t>The original DA of the packet is encoded as the last segment
+              of the path (encoded in the first element of the Segment
+              List).</t>
+
+              <t>The DA of the packet is set with the value of the first
+              segment (found in the last element of the segment list).</t>
+
+              <t>The Segments Left field is set to n-1 where n is the number
+              of elements in the Segment List.</t>
+
+              <t>The First Segment field is set to n-1 where n is the number
+              of elements in the Segment List.</t>
+
+              <t>The packet is sent out towards the first segment (i.e.:
+              represented in the packet DA).</t>
+
+              <t>HMAC and HMAC Key ID may be set according to <xref
+              target="Security"/>.</t>
+            </list></t>
+
+          <section title="Security at Ingress">
+            <t>The procedures related to the Segment Routing security are
+            detailed in <xref target="Security"/>.</t>
+
+            <t>In the case where the SR domain boundaries are not under
+            control of the network operator (e.g.: when the SR domain edge is
+            in a home network), it is important to authenticate and validate
+            the content of any SRH being received by the network operator. In
+            such case, the security procedure described in <xref
+            target="Security"/> is to be used. In short, it requires the
+            verification of the HMAC field in order to assert that this is a
+            valid and authorized use of SR.</t>
+          </section>
+        </section>
+
+        <section title="Transit Non-SR Capable Node">
+          <t>SR is interoperable with plain IPv6 forwarding. Any non
+          SR-capable node will forward SR packets solely based on the DA.
+          There&rsquo;s no SRH inspection. This ensures full interoperability
+          between SR and non-SR nodes.</t>
+        </section>
+
+        <section title="SR Intra Segment Transit Node">
+          <t>Only the node whose address is in DA inspects and processes the
+          SRH (according to <xref target="RFC2460"/>). An intra segment
+          transit node is not in the DA and its forwarding is based on DA and
+          its SR-IPv6 FIB.</t>
+        </section>
+
+        <section title="SR Segment Endpoint Node">
+          <t>The SR segment endpoint node is the node whose address is in the
+          DA. The segment endpoint node inspects the SRH and does:<figure
+              align="center" suppress-title="true">
+              <artwork><![CDATA[
+1.   IF DA = myself (segment endpoint)
+2.      IF Segments Left > 0 THEN
+           decrement Segments Left
+           update DA with Segment List[Segments Left]
+3.         IF Segments Left == 0 THEN
+              IF Clean-up bit is set THEN remove the SRH
+4.      ELSE give the packet to next PID (application)
+             End of processing.
+5.   Forward the packet out
+]]></artwork>
+            </figure></t>
+        </section>
+      </section>
+
+      <section anchor="FRR" title="FRR Flag Settings">
+        <t>A node supporting SR and doing Fast Reroute (as described in <xref
+        target="I-D.ietf-spring-segment-routing"/>, when rerouting packets
+        through FRR mechanisms, SHOULD inspect the rerouted packet header and
+        look for the SRH. If the SRH is present, the rerouting node SHOULD set
+        the Protected bit on all rerouted packets.</t>
+      </section>
+    </section>
+
+    <section title="MTU Considerations">
+      <t>To be continued</t>
+
+      <t>As an additional header is inserted in the IPv6 packet, the total
+      packet length is increased. If SR is activated within a single domain,
+      then the operator SHOULD configure the MTU of all its intra-domain links
+      to allow for this increased packet length. Else, routers in the path
+      will have to generate ICMP packet-too-big reporting the active MTU size
+      (for example 1500 bytes) and the source will be unable to reduce the MTU
+      to accomodate for the SRH size (for example 100 bytes) because the
+      source does not know the size of the SRH.</t>
+    </section>
+
+    <section title="SR and Tunneling">
+      <t>Encapsulation can be realized in two different ways with
+      SR-IPv6:<list style="hanging">
+          <t>Outer encapsulation.</t>
+
+          <t>SRH with SA/DA original addresses.</t>
+        </list></t>
+
+      <t>Outer encapsulation tunneling is the traditional method where an
+      additional IPv6 header is prepended to the packet. The original IPv6
+      header being encapsulated, everything is preserved and the packet is
+      switched/routed according to the outer header (that could contain a
+      SRH).</t>
+
+      <t>SRH allows encoding both original SA and DA, hence an operator may
+      decide to change the SA/DA at ingress and restore them at egress. This
+      can be achieved without outer encapsulation, by changing SA/DA and
+      encoding the original SA in the Policy List and in the original DA in
+      the Segment List.</t>
+    </section>
+
+    <section anchor="USECASES" title="Example Use Case">
+      <t>A more detailed description of use cases are available in <xref
+      target="I-D.ietf-spring-ipv6-use-cases"/>. In this section, a simple
+      SR-IPv6 example is illustrated.</t>
+
+      <t>In the topology described in <xref target="SRTOPO"/> it is assumed an
+      end-to-end SR deployment. Therefore SR is supported by all nodes from A
+      to J.</t>
+
+      <t><figure anchor="SRTOPO" title="Sample SR topology">
+          <artwork><![CDATA[
+ Home Network |          Backbone         |    Datacenter
+              |                           |
+              |   +---+   +---+   +---+   |   +---+   |
+          +---|---| C |---| D |---| E |---|---| I |---|   
+          |   |   +---+   +---+   +---+   |   +---+   |
+          |   |     |       |       |     |     |     |  +---+
++---+   +---+ |     |       |       |     |     |     |--| X |
+| A |---| B | |   +---+   +---+   +---+   |   +---+   |  +---+
++---+   +---+ |   | F |---| G |---| H |---|---| J |---|  
+              |   +---+   +---+   +---+   |   +---+   |
+              |                           |
+              |        +-----------+          
+                       |    SDN    |
+                       | Orch/Ctlr |
+                       +-----------+
+]]></artwork>
+        </figure></t>
+
+      <t>The following workflow applies to packets sent by host A and destined
+      to server X.<figure suppress-title="true">
+          <artwork><![CDATA[
+. Host A sends a request for a path to server X to the SDN 
+  controller or orchestration system.
+
+. The SDN controller/orchestrator computes a path consisting 
+  of C, F, J, X and builds an SRH with:
+   . Segment List: X, J, F, C
+   . HMAC
+  that satisfies the requirements expressed in the request 
+  by host A and based on policies applicable to host A.
+
+. Host A receives the SRH and insert it into the packet. 
+  The packet has now:
+   . SA: A
+   . DA: C
+   . SRH with 
+      . SL: X, J, F, C 
+      . Segments Left: 3 (i.e.: Segment List size - 1)
+      . PL: C (ingress), J (egress)
+     Note that X is the last segment and C is the 
+     first segment (i.e.: the SL is encoded in the reverse 
+     path order). 
+   . HMAC
+
+. When packet arrives in C (first segment), C does:
+   . Validate the HMAC of the SRH.
+   . Decrement Segments Left by one: 2
+   . Update the DA with the next segment found in  
+     Segment List[2]. DA is set to F.
+   . Forward the packet to F.
+
+. When packet arrives in F (second segment), F does:
+   . Decrement Segments Left by one: 1
+   . Update the DA with the next segment found in  
+     Segment List[1]. DA is set to J.
+   . Forward the packet to J.
+
+. Packet travels across G and H nodes which do plain 
+  IPv6 forwarding based on DA. No inspection of SRH needs
+  to be done in these nodes. However, any SR capable node 
+  is allowed to set the Protected bit in case of FRR 
+  protection.
+
+. When packet arrives in J (third segment), J does:
+   . Decrement Segments Left by one: 0
+   . Update the DA with the next segment found in  
+     Segment List[0]. DA is set to X.
+   . If the cleanup bit is set, then node J will strip out 
+     the SRH from the packet.
+   . Forward the packet to X.
+]]></artwork>
+        </figure></t>
+
+      <t>The packet arrives in the server that may or may not support SR. The
+      return traffic, from server to host, may be sent using the same
+      procedures.</t>
+    </section>
+
+    <section anchor="Security" title="Security Considerations">
+      <t>This section analyzes the security threat model, the security issues
+      and proposed solutions related to the new Segment Routing Header.</t>
+
+      <t>The Segment Routing Header (SRH) is simply another type of the
+      routing header as described in <xref target="RFC2460">RFC 2460</xref>
+      and is:<list style="symbols">
+          <t>inserted by a SR edge router when entering the segment routing
+          domain or by the originating host itself. The source host can even
+          be outside the SR domain;</t>
+
+          <t>inspected and acted upon when reaching the destination address of
+          the IP header per <xref target="RFC2460">RFC 2460</xref>.</t>
+        </list></t>
+
+      <t>Per <xref target="RFC2460">RFC2460</xref>, routers on the path that
+      simply forward an IPv6 packet (i.e. the IPv6 destination address is none
+      of theirs) will never inspect and process the content of SRH. Routers
+      whose one interface IPv6 address equals the destination address field of
+      the IPv6 packet MUST to parse the SRH and, if supported and if the local
+      configuration allows it, MUST act accordingly to the SRH content.</t>
+
+      <t>According to <xref target="RFC2460">RFC2460</xref>, the default
+      behavior of a non SR-capable router upon receipt of an IPv6 packet with
+      SRH destined to an address of its, is to:<list style="symbols">
+          <t>ignore the SRH completely if the Segment Left field is 0 and
+          proceed to process the next header in the IPv6 packet;</t>
+
+          <t>discard the IPv6 packet if Segment Left field is greater than 0,
+          it MAY send a Parameter Problem ICMP message back to the Source
+          Address.</t>
+        </list></t>
+
+      <section anchor="THREAT" title="Threat model">
+        <section title="Source routing threats">
+          <t>Using a SRH is similar to source routing, therefore it has some
+          well-known security issues as described in <xref
+          target="RFC4942">RFC4942</xref> section 2.1.1 and <xref
+          target="RFC5095">RFC5095</xref>:<list style="symbols">
+              <t>amplification attacks: where a packet could be forged in such
+              a way to cause looping among a set of SR-enabled routers causing
+              unnecessary traffic, hence a Denial of Service (DoS) against
+              bandwidth;</t>
+
+              <t>reflection attack: where a hacker could force an intermediate
+              node to appear as the immediate attacker, hence hiding the real
+              attacker from na&iuml;ve forensic;</t>
+
+              <t>bypass attack: where an intermediate node could be used as a
+              stepping stone (for example in a De-Militarized Zone) to attack
+              another host (for example in the datacenter or any back-end
+              server).</t>
+            </list></t>
+        </section>
+
+        <section anchor="APPSRH" title="Applicability of RFC 5095 to SRH">
+          <t>First of all, the reader must remember this specific part of
+          section 1 of <xref target="RFC5095">RFC5095</xref>, "A side effect
+          is that this also eliminates benign RH0 use-cases; however, such
+          applications may be facilitated by future Routing Header
+          specifications.". In short, it is not forbidden to create new secure
+          type of Routing Header; for example, <xref target="RFC6554">RFC 6554
+          (RPL)</xref> also creates a new Routing Header type for a specific
+          application confined in a single network.</t>
+
+          <t>In the segment routing architecture described in <xref
+          target="I-D.ietf-spring-segment-routing"/> there are basically two
+          kinds of nodes (routers and hosts):<list style="symbols">
+              <t>nodes within the SR domain, which is within one single
+              administrative domain, i.e., where all nodes are trusted anyway
+              else the damage caused by those nodes could be worse than
+              amplification attacks: traffic interception, man-in-the-middle
+              attacks, more server DoS by dropping packets, and so on.</t>
+
+              <t>nodes outside of the SR domain, which is outside of the
+              administrative segment routing domain hence they cannot be
+              trusted because there is no physical security for those nodes,
+              i.e., they can be replaced by hostile nodes or can be coerced in
+              wrong behaviors.</t>
+            </list></t>
+
+          <t>The main use case for SR consists of the single administrative
+          domain where only trusted nodes with SR enabled and configured
+          participate in SR: this is the same model as in <xref
+          target="RFC6554">RFC6554</xref>. All non-trusted nodes do not
+          participate as either SR processing is not enabled by default or
+          because they only process SRH from nodes within their domain.</t>
+
+          <t>Moreover, all SR nodes ignore SRH created by outsiders based on
+          topology information (received on a peering or internal interface)
+          or on presence and validity of the HMAC field. Therefore, if
+          intermediate nodes ONLY act on valid and authorized SRH (such as
+          within a single administrative domain), then there is no security
+          threat similar to RH-0. Hence, the <xref target="RFC5095">RFC
+          5095</xref> attacks are not applicable.</t>
+        </section>
+
+        <section title="Service stealing threat">
+          <t>Segment routing is used for added value services, there is also a
+          need to prevent non-participating nodes to use those services; this
+          is called &lsquo;service stealing prevention&rsquo;.</t>
+        </section>
+
+        <section title="Topology disclosure">
+          <t>The SRH may also contains IPv6 addresses of some intermediate
+          SR-nodes in the path towards the destination, this obviously reveals
+          those addresses to the potentially hostile attackers if those
+          attackers are able to intercept packets containing SRH. On the other
+          hand, if the attacker can send specially crafted data plane packets
+          through the SR path in order to generate ICMP packets back (for
+          example a traceroute), per RFC 4443, the ICMP messages should
+          include as much as possible of the original packet (including the
+          SRH of course), then there is little more to learn by intercepting
+          the SRH itself. Also the clean-bit of SRH can help by removing the
+          SRH before forwarding the packet towards the destination over a
+          potentially non-trusted part of the network.</t>
+
+          <t>This threat is not deemed as critical hence the segment list is
+          not encrypted in the SRH.</t>
+        </section>
+
+        <section title="ICMP Generation">
+          <t>Per section 4.4 of <xref target="RFC2460">RFC2460</xref>, when
+          destination nodes (i.e. where the destination address is one of
+          theirs) receive a Routing Header with unsupported Routing Type, the
+          required behavior is:<list style="symbols">
+              <t>If Segments Left is zero, the node must ignore the Routing
+              header and proceed to process the next header in the packet.</t>
+
+              <t>If Segments Left is non-zero, the node must discard the
+              packet and send an ICMP Parameter Problem, Code 0, message to
+              the packet's Source Address, pointing to the unrecognized
+              Routing Type.</t>
+            </list></t>
+
+          <t>This required behavior could be used by an attacker to force the
+          generation of ICMP message by any node. The attacker could send
+          packets with SRH (with Segment Left set to 0) destined to a node not
+          supporting SRH. Per <xref target="RFC2460">RFC2460</xref>, the
+          destination node could generate an ICMP message, causing a local CPU
+          utilization and if the source of the offending packet with SRH was
+          spoofed could lead to a reflection attack without any
+          amplification.</t>
+
+          <t>It must be noted that this is a required behavior for any
+          unsupported Routing Type and not limited to SRH packets. So, it is
+          not specific to SRH and the usual rate limiting for ICMP generation
+          is required anyway for any IPv6 implementation and has been
+          implemented and deployed for many years.</t>
+        </section>
+      </section>
+
+      <section anchor="SECFIELDS" title="Security fields in SRH">
+        <t>This section summarizes the use of specific fields in the SRH. They
+        are based on a key-hashed message authentication code (HMAC).</t>
+
+        <t>The security-related fields in SRH are:<list style="symbols">
+            <t>HMAC Key-id, 8 bits wide;</t>
+
+            <t>HMAC, 256 bits wide (optional, exists only if HMAC Key-id is
+            not 0).</t>
+          </list></t>
+
+        <t>The HMAC field is the output of the HMAC computation (per <xref
+        target="RFC2104">RFC 2104</xref>) using a pre-shared key identified by
+        HMAC Key-id and of the text which consists of the concatenation
+        of:<list style="symbols">
+            <t>the source IPv6 address;</t>
+
+            <t>First Segment field;</t>
+
+            <t>an octet whose bit-0 is the clean-up bit flag and others are
+            0;</t>
+
+            <t>HMAC Key-id;</t>
+
+            <t>all addresses in the Segment List.</t>
+          </list></t>
+
+        <t>The purpose of the HMAC field is to verify the validity, the
+        integrity and the authorization of the SRH itself. If an outsider of
+        the SR domain does not have access to a current pre-shared secret,
+        then it cannot compute the right HMAC field and the first SR router on
+        the path processing the SRH and configured to check the validity of
+        the HMAC will simply reject the packet.</t>
+
+        <t>The HMAC field is located at the end of the SRH simply because only
+        the router on the ingress of the SR domain needs to process it, then
+        all other SR nodes can ignore it (based on local policy) because they
+        trust the upstream router. This is to speed up forwarding operations
+        because SR routers which do not validate the SRH do not need to parse
+        the SRH until the end.</t>
+
+        <t>The HMAC Key-id field allows for the simultaneous existence of
+        several hash algorithms (SHA-256, SHA3-256 ... or future ones) as well
+        as pre-shared keys. This allows for pre-shared key roll-over when two
+        pre-shared keys are supported for a while when all SR nodes converged
+        to a fresher pre-shared key. The HMAC Key-id field is opaque, i.e., it
+        has neither syntax not semantic except as an index to the right
+        combination of pre-shared key and hash algorithm and except that a
+        value of 0 means that there is no HMAC field. It could also allow for
+        interoperation among different SR domains if allowed by local policy
+        and assuming a collision-free Key Id allocation.</t>
+
+        <t>When a specific SRH is linked to a time-related service (such as
+        turbo-QoS for a 1-hour period) where the DA, Segment ID (SID) are
+        identical, then it is important to refresh the shared-secret
+        frequently as the HMAC validity period expires only when the HMAC
+        Key-id and its associated shared-secret expires.</t>
+
+        <section anchor="algorithm" title="Selecting a hash algorithm">
+          <t>The HMAC field in the SRH is 256 bit wide. Therefore, the HMAC
+          MUST be based on a hash function whose output is at least 256 bits.
+          If the output of the hash function is 256, then this output is
+          simply inserted in the HMAC field. If the output of the hash
+          function is larger than 256 bits, then the output value is truncated
+          to 256 by taking the least-significant 256 bits and inserting them
+          in the HMAC field.</t>
+
+          <t>SRH implementations can support multiple hash functions but MUST
+          implement <xref target="FIPS180-4">SHA-2</xref> in its SHA-256
+          variant.</t>
+
+          <t>NOTE: SHA-1 is currently used by some early implementations used
+          for quick interoperations testing, the 160-bit hash value must then
+          be right-hand padded with 96 bits set to 0. The authors understand
+          that this is not secure but is ok for limited tests.</t>
+        </section>
+
+        <section anchor="performance" title="Performance impact of HMAC">
+          <t>While adding a HMAC to each and every SR packet increases the
+          security, it has a performance impact. Nevertheless, it must be
+          noted that:<list style="symbols">
+              <t>the HMAC field is used only when SRH is inserted by a device
+              (such as a home set-up box) which is outside of the segment
+              routing domain. If the SRH is added by a router in the trusted
+              segment routing domain, then, there is no need for a HMAC field,
+              hence no performance impact.</t>
+
+              <t>when present, the HMAC field MUST only be checked and
+              validated by the first router of the segment routing domain,
+              this router is named 'validating SR router'. Downstream routers
+              may not inspect the HMAC field.</t>
+
+              <t>this validating router can also have a cache of &lt;IPv6
+              header + SRH, HMAC field value&gt; to improve the performance.
+              It is not the same use case as in IPsec where HMAC value was
+              unique per packet, in SRH, the HMAC value is unique per
+              flow.</t>
+
+              <t>Last point, hash functions such as SHA-2 have been optmized
+              for security and performance and there are multiple
+              implementations with good performance.</t>
+            </list></t>
+
+          <t>With the above points in mind, the performance impact of using
+          HMAC is minimized.</t>
+        </section>
+
+        <section anchor="keymanagement" title="Pre-shared key management">
+          <t>The field HMAC Key-id allows for:<list style="symbols">
+              <t>key roll-over: when there is a need to change the key (the
+              hash pre-shared secret), then multiple pre-shared keys can be
+              used simultaneously. The validating routing can have a table of
+              &lt;HMAC Key-id, pre-shared secret&gt; for the currently active
+              and future keys.</t>
+
+              <t>different algorithm: by extending the previous table to
+              &lt;HMAC Key-id, hash function, pre-shared secret&gt;, the
+              validating router can also support simultaneously several hash
+              algorithms (see section <xref target="algorithm"/>)</t>
+            </list></t>
+
+          <t>The pre-shared secret distribution MUST be executed in a secure
+          and trusted way, for example:<list style="symbols">
+              <t>in the configuration of the validating routers, either by
+              static configuration or any SDN oriented approach using a secure
+              and trusted channel;</t>
+
+              <t>dynamically using a trusted key distribution such as <xref
+              target="RFC6407"/></t>
+            </list></t>
+
+          <t>The intent of this document is NOT to define
+          yet-another-key-distribution-protocol.</t>
+        </section>
+      </section>
+
+      <section anchor="DEPLOYMENT" title="Deployment Models">
+        <section anchor="NODESINSR" title="Nodes within the SR domain">
+          <t>A SR domain is defined as a set of interconnected routers where
+          all routers at the perimeter are configured to insert and act on
+          SRH. Some routers inside the SR domain can also act on SRH or simply
+          forward IPv6 packets.</t>
+
+          <t>The routers inside a SR domain can be trusted to generate SRH and
+          to process SRH received on interfaces that are part of the SR
+          domain. These nodes MUST drop all SRH packets received on an
+          interface that is not part of the SR domain and containing a SRH
+          whose HMAC field cannot be validated by local policies. This
+          includes obviously packet with a SRH generated by a non-cooperative
+          SR domain.</t>
+
+          <t>If the validation fails, then these packets MUST be dropped, ICMP
+          error messages (parameter problem) SHOULD be generated (but rate
+          limited) and SHOULD be logged.</t>
+        </section>
+
+        <section anchor="NODESOUTSR" title="Nodes outside of the SR domain">
+          <t>Nodes outside of the SR domain cannot be trusted for physical
+          security; hence, they need to request by some trusted means (outside
+          of the scope of this document) a complete SRH for each new
+          connection (i.e. new destination address). The received SRH MUST
+          include a HMAC Key-id and HMAC field which is computed correctly
+          (see <xref target="SECFIELDS"/>).</t>
+
+          <t>When an outside node sends a packet with an SRH and towards a SR
+          domain ingress node, the packet MUST contain the HMAC Key-id and
+          HMAC field and the the destination address MUST be an address of a
+          SR domain ingress node .</t>
+
+          <t>The ingress SR router, i.e., the router with an interface address
+          equals to the destination address, MUST verify the HMAC field with
+          respect to the HMAC Key-id.</t>
+
+          <t>If the validation is successful, then the packet is simply
+          forwarded as usual for a SR packet. As long as the packet travels
+          within the SR domain, no further HMAC check needs to be done.
+          Subsequent routers in the SR domain MAY verify the HMAC field when
+          they process the SRH (i.e. when they are the destination).</t>
+
+          <t>If the validation fails, then this packet MUST be dropped, an
+          ICMP error message (parameter problem) SHOULD be generated (but rate
+          limited) and SHOULD be logged.</t>
+        </section>
+
+        <section title="SR path exposure">
+          <t>As the intermediate SR nodes addresses appears in the SRH, if
+          this SRH is visible to an outsider then he/she could reuse this
+          knowledge to launch an attack on the intermediate SR nodes or get
+          some insider knowledge on the topology. This is especially
+          applicable when the path between the source node and the first SR
+          domain ingress router is on the public Internet.</t>
+
+          <t>The first remark is to state that 'security by obscurity' is
+          never enough; in other words, the security policy of the SR domain
+          MUST assume that the internal topology and addressing is known by
+          the attacker. A simple traceroute will also give the same
+          information (with even more information as all intermediate nodes
+          between SID will also be exposed). IPsec Encapsulating Security
+          Payload <xref target="RFC4303"/> cannot be use to protect the SRH as
+          per RFC4303 the ESP header must appear after any routing header
+          (including SRH).</t>
+
+          <t>To prevent a user to leverage the gained knowledge by
+          intercepting SRH, it it recommended to apply an infrastructure
+          Access Control List (iACL) at the edge of the SR domain. This iACL
+          will drop all packets from outside the SR-domain whose destination
+          is any address of any router inside the domain. This security policy
+          should be tuned for local operations.</t>
+        </section>
+
+        <section title="Impact of BCP-38">
+          <t><xref target="RFC2827">BCP-38</xref>, also known as "Network
+          Ingress Filtering", checks whether the source address of packets
+          received on an interface is valid for this interface. The use of
+          loose source routing such as SRH forces packets to follow a path
+          which differs from the expected routing. Therefore, if BCP-38 was
+          implemented in all routers inside the SR domain, then SR packets
+          could be received by an interface which is not expected one and the
+          packets could be dropped.</t>
+
+          <t>As a SR domain is usually a subset of one administrative domain,
+          and as BCP-38 is only deployed at the ingress routers of this
+          administrative domain and as packets arriving at those ingress
+          routers have been normally forwarded using the normal routing
+          information, then there is no reason why this ingress router should
+          drop the SRH packet based on BCP-38. Routers inside the domain
+          commonly do not apply BCP-38; so, this is not a problem.</t>
+        </section>
+      </section>
+    </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+      <t>IANA is requested to allocate a new type for Routing Header.</t>
+    </section>
+
+    <section anchor="Manageability" title="Manageability Considerations">
+      <t>TBD</t>
+    </section>
+
+    <section anchor="Acknowledgements" title="Acknowledgements">
+      <t>The authors would like to thank Dave Barach, John Leddy, John
+      Brzozowski, Pierre Francois, Nagendra Kumar, Mark Townsley, Christian
+      Martin, Roberta Maglione, James Connolly, Aloys Augustin and Fred Baker
+      for their contribution to this document. Other people have contributed
+      by their questions and comments to this document: Brian Carpenter, Bob
+      Hinden, Ole Troan.</t>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml"?>
+
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2460.xml"?>
+
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.4303.xml"?>
+
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.5095.xml"?>
+
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.6407.xml"?>
+
+      <?rfc include="reference.I-D.ietf-ospf-ospfv3-segment-routing-extensions.xml"?>
+
+      <?rfc include="reference.I-D.ietf-isis-segment-routing-extensions.xml"?>
+
+      <reference anchor="FIPS180-4"
+                 target="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf">
+        <front>
+          <title>FIPS 180-4 Secure Hash Standard (SHS)</title>
+
+          <author>
+            <organization>National Institute of Standards and
+            Technology</organization>
+          </author>
+
+          <date month="March" year="2012"/>
+        </front>
+      </reference>
+    </references>
+
+    <references title="Informative References">
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.1940.xml"?>
+
+      <?rfc include="reference.I-D.ietf-spring-segment-routing.xml"?>
+
+      <?rfc include="reference.I-D.ietf-spring-ipv6-use-cases.xml"?>
+
+      <?rfc include="reference.I-D.ietf-spring-segment-routing-mpls.xml"?>
+
+      <?rfc include="reference.I-D.ietf-spring-resiliency-use-cases.xml"?>
+
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2104.xml"?>
+
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.2827.xml"?>
+
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.4942.xml"?>
+
+      <?rfc include="http://xml.resource.org/public/rfc/bibxml/reference.RFC.6554.xml"?>
+    </references>
+  </back>
+</rfc>
